@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+    <title>Insert title here</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <style type="text/css">
+            .container {
+                width: 700px;
+                height: 500px;
+                display: flex;
+            }
+
+            .row {
+                width: 75px;
+                height: 500px;
+                background-color: blue;
+            }
+
+            .left {
+                width: 75px;
+                height: 500px;
+                background-color: blue;
+            }
+
+            .right {
+                flex-grow: 1;
+                height: 500px;
+                background-color: gray;
+                position: relative; /* Sağ sütunu relative konumlandırma yapar */
+            }
+
+            .yukari {
+                width: 601px;
+                height: 50px;
+                background-color: navy;
+                position: relative; /* Yukarı kutuyu absolute konumlandırma yapar */
+                top: 0;
+            }
+
+            .left .menu label {
+                margin-bottom: 10px; /* Etiketler arasında boşluk bırakır */
+                display: block; /* Etiketleri blok element haline getirir */
+                border-bottom: 1px solid black; /* Her etiketin altına siyah bir çizgi ekler */
+            }
+
+            .left .menu {
+                padding-top: 85px;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="container">
+        <div class="left">
+            <div class="menu">
+                <label id="brandMenu" onclick="showBrandData()">Brand</label>
+                <label id="modelMenu" onclick="showModelData()">Model</label>
+                <label id="userModel" onclick="showUserData()">User</label>
+                <label id="logoutModel" onclick="logout()">Logout</label> <!-- Logout butonu -->
+            </div>
+        </div>
+        <div class="right">
+            <div class="yukari"></div>
+
+            <!-- Brand form -->
+            <form id="editForm" onsubmit="submitEditForm(event)" style="display: none;">
+                <input type="hidden" id="editId" name="id" />
+                <input type="text" id="editName" name="name" />
+                <button type="submit">Submit</button>
+            </form>
+
+            <!-- Model form -->
+            <form id="editModelForm" onsubmit="submitEditModelForm(event)" style="display: none;">
+                <input type="hidden" id="editModelId" name="id" />
+                <input type="text" id="editModelName" name="name" />
+                <input type="text" id="editModelBrand" name="brand" />
+                <button type="submit">Submit</button>
+            </form>
+
+            <!-- User form -->
+            <form id="editUserForm" onsubmit="submitEditUserForm(event)" style="display: none;">
+                <input type="hidden" id="editUserId" name="id" />
+                <input type="text" id="editUserUsername" name="username" />
+                <input type="text" id="editUserPassword" name="password" />
+                <input type="text" id="editUserRole" name="role" />
+                <button type="submit">Submit</button>
+            </form>
+
+            <div class="rentACar">
+                <div id="brandData" style="display: none; padding-top: 150px; width: 100%;">
+                    <!-- Brand data table -->
+                    <table class="table">
+                        <thead>
+                            <tr >
+                                <th scope="col">#</th>
+                                <th scope="col">Name</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="brand : ${brands}" th:id="${'brandTable'}">
+                                <td th:text="${brand.id}"></td>
+                                <td th:text="${brand.name}"></td>
+                                <td>
+                                    <button type="button" class="btn btn-danger" th:if="${isAdmin or isStandardUser}" onclick="deleteBrand()">Delete</button>
+                                    <button type="button" class="btn btn-primary" th:if="${isAdmin or isStandardUser}" th:attr="data-id=${brand.id},data-name=${brand.name}" onclick="editBrand(this)">Edit</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- User data table -->
+                <div id="userData" style="display: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}" th:id="${'userTable'}">
+                                <td th:text="${user.id}"></td>
+                                <td th:text="${user.username}"></td>
+                                <td th:text="${user.password}"></td>
+                                <td th:text="${user.role}"></td>
+                                <td>
+                                    <button type="button" class="btn btn-danger"   onclick="deleteModel()">Delete</button>
+                                    <button type="button" class="btn btn-primary"   th:attr="data-id=${user.id},data-username=${user.username},data-password=${user.password},data-role=${user.role}" onclick="editUser(this)">Edit</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Model data table -->
+                <div id="modelData" style="display: none; padding-top: 150px; width: 100%;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Brand</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="model : ${models}" th:id="${'modelTable'}">
+                                <td th:text="${model.id}"></td>
+                                <td th:text="${model.name}"></td>
+                                <td th:text="${model.brand.name}"></td>
+                                <td>
+                                    <button type="button" class="btn btn-danger" th:if="${isAdmin or isStandardUser}" onclick="deleteModel()">Delete</button>
+                                    <button type="button" class="btn btn-primary" th:if="${isAdmin or isStandardUser}" th:attr="data-id=${model.id},data-name=${model.name},data-brand=${model.brand.name}" onclick="editModel(this)">Edit</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Brand edit function
+        function editBrand(button) {
+            var id = button.getAttribute('data-id');
+            var name = button.getAttribute('data-name');
+
+            document.getElementById('editId').value = id;
+            document.getElementById('editName').value = name;
+
+            document.getElementById('editForm').style.display = 'block';
+        }
+
+        // Submit brand edit form function
+        function submitEditForm(event) {
+            event.preventDefault();
+
+            var id = document.getElementById('editId').value;
+            var name = document.getElementById('editName').value;
+
+            fetch('/api/brands/' + id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({name: name}),
+            })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        document.getElementById('editForm').style.display = 'none';
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+        }
+
+        // Model edit function
+        function editModel(button) {
+            var id = button.getAttribute('data-id');
+            var name = button.getAttribute('data-name');
+            var brand = button.getAttribute('data-brand');
+
+            document.getElementById('editModelId').value = id;
+            document.getElementById('editModelName').value = name;
+            document.getElementById('editModelBrand').value = brand;
+
+            document.getElementById('editModelForm').style.display = 'block';
+        }
+
+        // Submit model edit form function
+        function submitEditModelForm(event) {
+            event.preventDefault();
+
+            var id = document.getElementById('editModelId').value;
+            var name = document.getElementById('editModelName').value;
+
+            fetch('/api/models/' + id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({name: name}),
+            })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        document.getElementById('editModelForm').style.display = 'none';
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+        }
+
+        // User edit function
+        function editUser(button) {
+            var id = button.getAttribute('data-id');
+            var username = button.getAttribute('data-username');
+            var password = button.getAttribute('data-password');
+            var role = button.getAttribute('data-role');
+
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUserUsername').value = username;
+            document.getElementById('editUserPassword').value = password;
+            document.getElementById('editUserRole').value = role;
+
+            document.getElementById('editUserForm').style.display = 'block';
+        }
+
+        // Submit user edit form function
+        function submitEditUserForm(event) {
+            event.preventDefault();
+
+            var id = document.getElementById('editUserId').value;
+            var username = document.getElementById('editUserUsername').value;
+            var password = document.getElementById('editUserPassword').value;
+            var role = document.getElementById('editUserRole').value;
+
+
+
+
+            fetch('/api/users/' + id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({username: username, password: password, role: role}),
+            })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        document.getElementById('editUserForm').style.display = 'none';
+                    })
+                    .catch((error) => {
+                        alert("Bu işlemi gerçekleştirmek için yeterli yetkiniz yok");
+                    });
+        }
+
+        // Show brand data
+        function showBrandData() {
+            var brandData = document.getElementById("brandData");
+            var userData = document.getElementById("userData");
+            var modelData = document.getElementById("modelData");
+            brandData.style.display = "block";
+            userData.style.display = "none";
+            modelData.style.display = "none";
+        }
+
+        // Show user data
+        function showUserData() {
+            var userData = document.getElementById("userData");
+            var brandData = document.getElementById("brandData");
+            var modelData = document.getElementById("modelData");
+            userData.style.display = "block";
+            brandData.style.display = "none";
+            modelData.style.display = "none";
+        }
+
+        // Show model data
+        function showModelData() {
+            var modelData = document.getElementById("modelData");
+            var userData = document.getElementById("userData");
+            var brandData = document.getElementById("brandData");
+            modelData.style.display = "block";
+            userData.style.display = "none";
+            brandData.style.display = "none";
+        }
+
+        function logout() {
+            fetch('/logout', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        // Sunucudan HTML yerine JSON yanıtı bekliyorsak burada kontrol edebiliriz
+                        // Ancak, bu örnekte sadece başarılı bir logout olduğunda sayfayı yeniliyoruz
+                        window.location.reload();
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+        }
+
+
+
+
+    </script>
+</body>
+</html>
