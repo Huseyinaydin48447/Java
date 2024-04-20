@@ -23,30 +23,10 @@ public class BrandManager implements BrandService {
 	private BrandRepository brandRepository;
 	private ModelMapperService modelMapperService;
 	private BrandBusinessRules brandBusinessRules;
-	
-	//1
-//	@Autowired
-//	public BrandManager(BrandRepository brandRepository) {
-//		this.brandRepository = brandRepository;
-//	}
 
 
-	@Override
-//	public List<Brand> getAll() {
 	public List<GetAllBrandsResponse> getAll() {
 
-//		return brandRepository.findAll();
-//		List<Brand>  brands=  brandRepository.findAll();
-//		// boş olana  bir list oluşturur
-//		List<GetAllBrandsResponse> brandsResponse= new ArrayList<GetAllBrandsResponse>();
-//	
-//		for(Brand brand : brands) {
-//			GetAllBrandsResponse responseItem=new GetAllBrandsResponse();
-//			responseItem.setId(brand.getId());
-//			responseItem.setName(brand.getName());
-//			
-//			brandsResponse.add(responseItem);
-//		}
 		
 		List<Brand>  brands=  brandRepository.findAll();
 		List<GetAllBrandsResponse> brandsResponse= brands.stream()

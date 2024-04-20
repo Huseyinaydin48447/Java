@@ -3,7 +3,7 @@ package springExample.rentACar.webApi.controllers;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,25 +17,17 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import springExample.rentACar.business.abstracts.BrandService;
 import springExample.rentACar.business.requests.CreateBrandRequest;
-import springExample.rentACar.business.requests.UpdateBrandRequest;
 import springExample.rentACar.business.responeses.GetAllBrandsResponse;
 import springExample.rentACar.business.responeses.GetByIdBrandsResponse;
+import springExample.rentACar.dataAccess.abstracts.BrandRepository;
+import springExample.rentACar.entities.concreters.Brand;
 
 @RestController
 @RequestMapping("/api/brands")
 @AllArgsConstructor
 public class BrandsController {
 	private BrandService brandService;
-
-//	@Autowired // bunun:BrandService  otomatik bakıp  yapıyor
-//	public BrandsController(BrandService brandService) {
-//		this.brandService = brandService;
-//	}
-	
-//	@GetMapping("/getall")
-//	public List<Brand> getAll(){
-//		return brandService.getAll();
-//	} 
+	private BrandRepository brandRepository;
 	
 	@GetMapping()
 	public List<GetAllBrandsResponse> getAll(){
@@ -54,18 +46,26 @@ public class BrandsController {
 	public GetByIdBrandsResponse getById(@PathVariable  int id){
 		return brandService.getById(id);
 	}
-	
-	@PutMapping
-	public void update(UpdateBrandRequest updateBrandRequest) {
-		this.brandService.update(updateBrandRequest);
+
+	@PostMapping("/updateBrand")
+	public ResponseEntity<?> updateBrand(@RequestBody Brand brand) {
+	    brandRepository.save(brand);
+	    
+	    return ResponseEntity.ok(brand);
 	}
-	@DeleteMapping("/{id}")
-	public void delete(@PathVariable int id) {
-		this.brandService.delete(id);
+
+	@PutMapping("/{id}")
+	public ResponseEntity<?> updateBrand(@PathVariable int id, @RequestBody Brand brand) {
+	    Brand existingBrand = brandRepository.findById(id).orElse(null);
+	    if (existingBrand != null) {
+	        existingBrand.setName(brand.getName());
+	        brandRepository.save(existingBrand);
+	        return ResponseEntity.ok(existingBrand);
+	    } else {
+	        return ResponseEntity.notFound().build();
+	    }
 	}
-	
-	
-	
+
 	
 	//swagger-ui/index.html
 

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import springExample.rentACar.business.abstracts.ModelService;
 import springExample.rentACar.business.requests.CreateModelRequest;
 import springExample.rentACar.business.responeses.GetAllModelsResponse;
+import springExample.rentACar.business.responeses.GetByIdModelsResponse;
 import springExample.rentACar.core.utilities.mappers.ModelMapperService;
 import springExample.rentACar.dataAccess.abstracts.ModelRepository;
 import springExample.rentACar.entities.concreters.Model;
@@ -36,5 +37,24 @@ public class ModelManager  implements ModelService {
 		
 		this.modelRepository.save(model);		
 	}
+
+	@Override
+	public GetByIdModelsResponse getById(int id) {
+		
+		Model model =this.modelRepository.findById(id).orElseThrow();
+		
+		GetByIdModelsResponse response=this.modelMapperService
+				.forResponse().map(model, GetByIdModelsResponse.class);
+		
+				return response;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 
 }

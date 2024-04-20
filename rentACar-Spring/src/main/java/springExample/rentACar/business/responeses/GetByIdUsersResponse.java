@@ -7,11 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetAllModelsResponse {
-	// yeni bir sütün eklemek için sadece buraya eklemek yeterli
+public class GetByIdUsersResponse {
 	private int id;
-	private String name;
-	private String brand_id;
-
-	
+	private String username;
+	private String password;
+	private String role;
 }
